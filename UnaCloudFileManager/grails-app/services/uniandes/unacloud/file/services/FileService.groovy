@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
+import uniandes.unacloud.common.utils.FileCloudUtils;
 import uniandes.unacloud.common.utils.UnaCloudConstants;
 import uniandes.unacloud.share.db.ImageManager;
 import uniandes.unacloud.share.db.StorageManager;
@@ -18,6 +19,8 @@ import uniandes.unacloud.file.db.UserManager;
 import uniandes.unacloud.file.db.ImageFileManager;
 import uniandes.unacloud.file.db.entities.UserEntity
 import uniandes.unacloud.file.db.entities.ImageFileEntity;
+import uniandes.unacloud.file.torrent.TorrentMaker;
+import uniandes.unacloud.file.torrent.TorrentTracker;
 import grails.transaction.Transactional
 
 /**
@@ -74,9 +77,19 @@ class FileService implements ApplicationContextAware {
 						image.setMainFile(image.getRepository().getRoot()+image.getName()+"_"+user.getUsername()+File.separator+fileName)
 					}
 					sizeImage += it.getSize()
-				}				
+				}			
+				println "Time for "+image.getName()
+				println "Zipping file.."+image.getRepository().getRoot()+image.getName()+"_"+user.getUsername()+File.separator
+				File zip = FileCloudUtils.createZipArchive(image.getRepository().getRoot()+image.getName()+"_"+user.getUsername()+File.separator, image.getName())
+				println zip.getName()
+				if(!zip.exists())zip.createNewFile()
+				File torrent = new File(image.getRepository().getRoot()+image.getName()+"_"+user.getUsername()+File.separator+image.getName()+".torrent")
+				println torrent.getName()
+				if(!torrent.exists())torrent.createNewFile()
+				TorrentMaker.createTorrent(torrent,zip, "http://157.253.195.22:10028/announce" )
 				ImageFileManager.setImageFile(new ImageFileEntity(image.getId(), ImageEnum.AVAILABLE, null, null, null, image.isPublic(), sizeImage, image.getMainFile(), null, null),false, con, true)
-	
+				TorrentTracker.getInstance().announceTorrent(torrent.getAbsolutePath());
+				TorrentTracker.shareFile(torrent, zip)
 			}
 			con.close();
 		}catch(Exception e){

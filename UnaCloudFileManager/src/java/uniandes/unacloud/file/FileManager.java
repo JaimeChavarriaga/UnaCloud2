@@ -9,6 +9,7 @@ import uniandes.unacloud.share.manager.ProjectManager;
 import uniandes.unacloud.file.com.AgentServerSocket;
 import uniandes.unacloud.file.com.DataServerSocket;
 import uniandes.unacloud.file.queue.QueueMessageFileProcessor;
+import uniandes.unacloud.file.torrent.TorrentTracker;
 
 /**
  * Initializes and control all services in project. It class extends from Project Manager class and works as a Singleton class.
@@ -71,7 +72,8 @@ public class FileManager extends ProjectManager{
 	@Override
 	protected void startCommunicationService() throws Exception {
 		System.out.println("Start communication service");
-		new DataServerSocket(reader.getIntegerVariable(UnaCloudConstants.FILE_SERVER_PORT),30).start();
+		//new DataServerSocket(reader.getIntegerVariable(UnaCloudConstants.FILE_SERVER_PORT),30).start();
+		TorrentTracker.getInstance().start(reader.getIntegerVariable(UnaCloudConstants.FILE_SERVER_PORT));
 		new AgentServerSocket(reader.getIntegerVariable(UnaCloudConstants.VERSION_MANAGER_PORT), 30).start();
 	}
 

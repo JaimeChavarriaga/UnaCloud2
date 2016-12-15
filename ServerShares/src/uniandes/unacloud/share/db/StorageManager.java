@@ -3,6 +3,7 @@ package uniandes.unacloud.share.db;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import uniandes.unacloud.share.entities.RepositoryEntity;
 
@@ -52,6 +53,24 @@ public class StorageManager {
 			if(rs.next())repo = new RepositoryEntity(rs.getLong(1), rs.getString(2), rs.getInt(3), rs.getString(4));
 			try{rs.close();ps.close();}catch(Exception e){}
 			return repo;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static ArrayList<RepositoryEntity> getAllRepository(Connection con){
+		try {	
+			ArrayList<RepositoryEntity> repositories = new ArrayList<RepositoryEntity>();
+			PreparedStatement ps = con.prepareStatement("SELECT re.id, re.name, re.capacity, re.path FROM repository re;");
+			System.out.println(ps.toString());
+			ResultSet rs = ps.executeQuery();	
+			while(rs.next()){
+				RepositoryEntity repo = new RepositoryEntity(rs.getLong(1), rs.getString(2), rs.getInt(3), rs.getString(4));
+				repositories.add(repo);
+			}			
+			try{rs.close();ps.close();}catch(Exception e){}
+			return repositories;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
