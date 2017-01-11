@@ -111,7 +111,6 @@ public class TorrentTracker{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Finish");		
 	}
 	
 
